@@ -5,16 +5,17 @@ from datetime import datetime
 from decimal import Decimal
 import csv
 
+
 csv_date_format = '%d-%m-%Y'
 mysql_date_format = '%Y-%m-%d %H:%M:%S'
 
 # To connect MySQL database
 # Enter your own values for the parameters
 conn = pymysql.connect(
-        host='localhost', # Your Mysql Server name
-        user='root', # Your Mysql Username
-        password="", # Your Mysql Password
-        db='database_gfg',# Your Mysql database name
+        host='localhost', # Your MySQL Server name
+        user='root', # Your MySQL Username
+        password="", # Your MySQL Password
+        db='database_gfg',# Your MySQL database name
 )
 
 cur = conn.cursor()
@@ -34,14 +35,19 @@ for index, row in df.iterrows():
     dt_object_ship = datetime.strptime(date_str_ship, csv_date_format)
     # format for MySQL
     mysql_formatted_date_ship = dt_object_order.strftime(mysql_date_format)
-    #sales_value = float(row['Sales'])
-    sales_value = df['Sales'].apply(lambda x: Decimal(x))
+    df['Sales'] = df['Sales'].astype(str)
+    df['Sales'].str.lower()
+    df['Sales'] = (
+         df['Sales'].str.replace(",", ".", regex=False)
+        .str.replace(r"[^0-9.]", "", regex=True)
+        .str.strip())
+    df['Sales'] = df['Sales'].apply(lambda x: Decimal(x))
 
     sql =  f"""
            INSERT INTO {table_name} (RowID, OrderID, OrderDate, ShipDate, ShipMode,
            CustomerID, CustomerName, Segment, Country, City, State, PostalCode, ProductID,
-           Region, Sales, SubCategory, ProductName )           
-           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+           Category, Region, Sales, SubCategory, ProductName )           
+           VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
     # Map CSV columns to table columns
     val = (row['Row ID'], row['Order ID'], mysql_formatted_date_order,
@@ -49,7 +55,7 @@ for index, row in df.iterrows():
            row['Customer ID'], row['Customer Name'], row['Segment'],
            row['Country'], row['City'],
            row['State'], row['Postal Code'], row['Product ID'],
-           row['Region'], sales_value,
+           row['Category'], row['Region'], row['Sales'],
            row['Sub-Category'], row['Product Name'])
     conn.ping()  # reconnecting mysql
     with conn.cursor() as cur:
