@@ -21,7 +21,7 @@ sql = f"""
        State VARCHAR(50) NOT NULL, PostalCode INT,Region VARCHAR(50) NOT NULL,
        ProductID VARCHAR(50) NOT NULL,Category VARCHAR(50) NOT NULL,
        SubCategory VARCHAR(50) NOT NULL,
-       ProductName VARCHAR(50) NOT NULL, Sales DECIMAL(5,4)
+       ProductName VARCHAR(50) NOT NULL, Sales DECIMAL(10,3)
        )
        """
 
